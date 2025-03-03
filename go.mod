@@ -2,9 +2,13 @@ module nats-template
 
 go 1.22.12
 
-require github.com/nats-io/nats.go v1.39.1
+require (
+	github.com/aws/aws-sdk-go v1.55.6
+	github.com/nats-io/nats.go v1.39.1
+)
 
 require (
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/nats-io/nkeys v0.4.9 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
