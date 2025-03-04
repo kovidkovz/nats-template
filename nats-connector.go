@@ -18,7 +18,7 @@ func NatsConnector() (*nats.Conn, nats.JetStreamContext, error){
 
 	if err != nil {
 		nc.Close()
-		return nil, nil, fmt.Errorf("Error initializing the jetstream: %w", err)
+		return nil, nil, fmt.Errorf("error initializing the jetstream: %w", err)
 	}
 
 	return nc, js, nil
