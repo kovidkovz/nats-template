@@ -8,7 +8,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func consumer(stream string, subject string, durable_name string, frequency string, messagehandler func(msg *nats.Msg)) {
+func Consumer(stream string, subject string, durable_name string, frequency string, messagehandler func(msg *nats.Msg)) {
 	nc, jetstream_consumer, err := NatsConnector()
 	if err != nil {
 		log.Fatalf("Error getting nats connection: %v", err)
