@@ -1,4 +1,4 @@
-module nats-template
+module github.com/kovidkovz/nats-template/tree/dev/nats-template
 
 go 1.22.12
 
