@@ -17,6 +17,7 @@ func consumer(stream string, subject string, durable_name string, frequency stri
 	defer nc.Close() //The defer keyword is used to execute the function at the end of the main function. In this case the nc.close will get executed just before the last curly brace.}
 
 	// Define ConsumerConfig
+	// we can manually also add a consumer that will make things even faster
 	consumerConfig := &nats.ConsumerConfig{
 		DeliverPolicy: nats.DeliverAllPolicy, // Equivalent to DeliverPolicy.ALL
 		AckPolicy:     nats.AckAllPolicy,     // Equivalent to AckPolicy.ALL
