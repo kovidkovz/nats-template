@@ -1,4 +1,4 @@
-module github.com/kovidkovz/nats_template
+module github.com/kovidkovz/natstemplate
 
 go 1.22.12
 
