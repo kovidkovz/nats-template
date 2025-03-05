@@ -33,7 +33,7 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 	streamExists := false
 	for streamInfo := range streams {
 		fmt.Println(streamInfo.Config.Name)
-		if streamInfo.Config.Name == stream { // Correct field names
+		if streamInfo.Config.Name == stream {
 			streamExists = true
 			break
 		}
