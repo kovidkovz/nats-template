@@ -53,4 +53,5 @@ func (p *Producer) CloseConnection() {
 }
 
 // Global Producer instance (renamed to avoid redeclaration)
+// pass by reference, to avoid creating a copy
 var NatsProducerInstance = &Producer{} // Renamed to avoid conflict
