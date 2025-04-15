@@ -21,17 +21,10 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 		FilterSubject: subject,
 	}
 
-	streams := jetstream_consumer.StreamsInfo()
-	streamExists := false
-	for streamInfo := range streams {
-		if streamInfo.Config.Name == stream {
-			streamExists = true
-			break
-		}
-	}
-
-	if !streamExists {
-		log.Fatalf("Stream does not exist: %s", stream)
+	_, err = jetstream_consumer.StreamInfo(stream)
+	if err != nil {
+		fmt.Println("stream does not exist", err)
+		return
 	}
 
 	_, err = jetstream_consumer.AddConsumer(stream, consumerConfig)
