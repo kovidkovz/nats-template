@@ -14,22 +14,29 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 		log.Fatalf("Error getting nats connection: %v", err)
 	}
 
-	consumerConfig := &nats.ConsumerConfig{
-		DeliverPolicy: nats.DeliverAllPolicy,
-		AckPolicy:     nats.AckAllPolicy,
-		MaxDeliver:    1024,
-		FilterSubject: subject,
-	}
-
 	_, err = jetstream_consumer.StreamInfo(stream)
 	if err != nil {
 		fmt.Println("stream does not exist", err)
 		return
 	}
 
-	_, err = jetstream_consumer.AddConsumer(stream, consumerConfig)
+	_, err = jetstream_consumer.ConsumerInfo(stream, durable_name)
 	if err != nil {
-		log.Fatalf("Failed to add consumer: %v", err)
+		// create a durable consumer
+		// define consumer configuration
+		consumerConfig := &nats.ConsumerConfig{
+			DeliverPolicy: nats.DeliverAllPolicy,
+			AckPolicy:     nats.AckExplicitPolicy,
+			MaxDeliver:    1024,
+			FilterSubject: subject,
+			Durable: durable_name,
+		}
+		
+		// add consumer into the jetstream
+		_, err = jetstream_consumer.AddConsumer(stream, consumerConfig)
+		if err != nil {
+			log.Fatalf("Failed to add consumer: %v", err)
+		}
 	}
 
 	pull_subscriber, err := jetstream_consumer.PullSubscribe(subject, durable_name)
@@ -51,8 +58,12 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 
 			// Read messages from the channel
 			for msg := range batch.Messages() { // Corrected: Read from the channel
+				log.Println("Total Messages in batch:", len(batch.Messages()))
 				messagehandler(msg)
-				msg.Ack()
+				err = msg.Ack()
+				if err != nil {
+					log.Println("Failed to ACK:", err)
+				}
 			}
 
 		} else {
@@ -65,7 +76,10 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 
 			for _, msg := range msgs {
 				messagehandler(msg)
-				msg.Ack()
+				err = msg.Ack()
+				if err != nil {
+					log.Println("Failed to ACK:", err)
+				}
 			}
 		}
 	}
