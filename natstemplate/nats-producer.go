@@ -14,17 +14,17 @@ type Producer struct {
 }
 
 // InitializeConnection establishes a connection to NATS and JetStream
-func (p *Producer) InitializeConnection() error {
+func (p *Producer) InitializeConnection() (*nats.Conn, nats.JetStreamContext, error){
 	// Call the exported GetNATSConnection function
 	nc, js, err := NatsConnector()
 	if err != nil {
-		return fmt.Errorf("error getting NATS connection: %w", err)
+		return nil, nil, fmt.Errorf("error getting NATS connection: %w", err)
 	}
 
 	fmt.Println("NATS Connected!")
 	p.natsConn = nc
 	p.jetstreamProducer = js
-	return nil
+	return nc, js, nil
 }
 
 // Produce publishes a message to a given NATS subject
