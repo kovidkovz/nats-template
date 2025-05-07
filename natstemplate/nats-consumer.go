@@ -8,18 +8,17 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func Consumer(stream string, subject string, durable_name string, frequency string, messagehandler func(msg *nats.Msg)) {
-	_, jetstream_consumer, err := NatsConnector()
-	if err != nil {
-		log.Fatalf("Error getting nats connection: %v", err)
-	}
-
-	_, err = jetstream_consumer.StreamInfo(stream)
+func Consumer(stream string, subject string, durable_name string, frequency string, jetstream_consumer nats.JetStreamContext, messagehandler func(msg *nats.Msg)) {
+	// check for the stream
+	streamInfo, err := jetstream_consumer.StreamInfo(stream)
 	if err != nil {
 		fmt.Println("stream does not exist", err)
 		return
 	}
 
+	fmt.Println("Subjects of stream:", streamInfo.Config.Subjects)
+
+	// check for the consumer info, so that duplicate consumer is not created
 	_, err = jetstream_consumer.ConsumerInfo(stream, durable_name)
 	if err != nil {
 		// create a durable consumer
@@ -39,6 +38,7 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 		}
 	}
 
+	// pull subscribe to the subject for consuming messages associated/attached to this subject in this particular stream...
 	pull_subscriber, err := jetstream_consumer.PullSubscribe(subject, durable_name)
 	if err != nil {
 		log.Fatalf("Failed to create a pull subscriber: %v", err)

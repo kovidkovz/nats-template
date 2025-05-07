@@ -3,6 +3,7 @@ module github.com/kovidkovz/natstemplate
 go 1.22.12
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/nats-io/nats.go v1.39.1
 )
 

@@ -8,37 +8,37 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func Consumer(stream string, subject string, durable_name string, frequency string, messagehandler func(msg *nats.Msg)) {
-	_, jetstream_consumer, err := NatsConnector()
+func Consumer(stream string, subject string, durable_name string, frequency string, jetstream_consumer nats.JetStreamContext, messagehandler func(msg *nats.Msg)) {
+	// check for the stream
+	streamInfo, err := jetstream_consumer.StreamInfo(stream)
 	if err != nil {
-		log.Fatalf("Error getting nats connection: %v", err)
+		fmt.Println("stream does not exist", err)
+		return
 	}
 
-	consumerConfig := &nats.ConsumerConfig{
-		DeliverPolicy: nats.DeliverAllPolicy,
-		AckPolicy:     nats.AckAllPolicy,
-		MaxDeliver:    1024,
-		FilterSubject: subject,
-	}
+	fmt.Println("Subjects of stream:", streamInfo.Config.Subjects)
 
-	streams := jetstream_consumer.StreamsInfo()
-	streamExists := false
-	for streamInfo := range streams {
-		if streamInfo.Config.Name == stream {
-			streamExists = true
-			break
+	// check for the consumer info, so that duplicate consumer is not created
+	_, err = jetstream_consumer.ConsumerInfo(stream, durable_name)
+	if err != nil {
+		// create a durable consumer
+		// define consumer configuration
+		consumerConfig := &nats.ConsumerConfig{
+			DeliverPolicy: nats.DeliverAllPolicy,
+			AckPolicy:     nats.AckExplicitPolicy,
+			MaxDeliver:    1024,
+			FilterSubject: subject,
+			Durable: durable_name,
+		}
+		
+		// add consumer into the jetstream
+		_, err = jetstream_consumer.AddConsumer(stream, consumerConfig)
+		if err != nil {
+			log.Fatalf("Failed to add consumer: %v", err)
 		}
 	}
 
-	if !streamExists {
-		log.Fatalf("Stream does not exist: %s", stream)
-	}
-
-	_, err = jetstream_consumer.AddConsumer(stream, consumerConfig)
-	if err != nil {
-		log.Fatalf("Failed to add consumer: %v", err)
-	}
-
+	// pull subscribe to the subject for consuming messages associated/attached to this subject in this particular stream...
 	pull_subscriber, err := jetstream_consumer.PullSubscribe(subject, durable_name)
 	if err != nil {
 		log.Fatalf("Failed to create a pull subscriber: %v", err)
@@ -58,8 +58,12 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 
 			// Read messages from the channel
 			for msg := range batch.Messages() { // Corrected: Read from the channel
+				log.Println("Total Messages in batch:", len(batch.Messages()))
 				messagehandler(msg)
-				msg.Ack()
+				err = msg.Ack()
+				if err != nil {
+					log.Println("Failed to ACK:", err)
+				}
 			}
 
 		} else {
@@ -72,7 +76,10 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 
 			for _, msg := range msgs {
 				messagehandler(msg)
-				msg.Ack()
+				err = msg.Ack()
+				if err != nil {
+					log.Println("Failed to ACK:", err)
+				}
 			}
 		}
 	}
