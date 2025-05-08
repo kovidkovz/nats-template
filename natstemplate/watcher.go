@@ -10,6 +10,7 @@ import (
 func Dynamic_Consumer_Creation(subject_prefix string, stream_prefix string, frequency string, js nats.JetStreamContext, messagehandler func(msg *nats.Msg)) {
 	// get the key value from the bucket
 	kv, err := js.KeyValue(os.Getenv("BUCKET"))
+	env := os.Getenv("ENV")
 	if err != nil {
 		log.Println("Error fetching bucket...", err)
 	}
@@ -22,7 +23,7 @@ func Dynamic_Consumer_Creation(subject_prefix string, stream_prefix string, freq
 				continue
 			}
 			subject := subject_prefix + update.Key() + ".*"
-			durable := "consumer_" + update.Key()
+			durable := "consumer_" + update.Key() + env
 			stream := stream_prefix + update.Key()
 
 			go Consumer(stream, subject, durable, frequency, js, messagehandler)
