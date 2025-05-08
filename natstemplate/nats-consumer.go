@@ -1,6 +1,7 @@
 package natstemplate
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -28,9 +29,9 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 			AckPolicy:     nats.AckExplicitPolicy,
 			MaxDeliver:    1024,
 			FilterSubject: subject,
-			Durable: durable_name,
+			Durable:       durable_name,
 		}
-		
+
 		// add consumer into the jetstream
 		_, err = jetstream_consumer.AddConsumer(stream, consumerConfig)
 		if err != nil {
@@ -52,8 +53,13 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 			// Fetch in batch mode
 			batch, err := pull_subscriber.FetchBatch(100, nats.MaxWait(5*time.Second))
 			if err != nil {
-				log.Println("Error fetching messages:", err)
-				continue // Don't exit, just retry
+				if errors.Is(err, nats.ErrNoResponders) {
+					log.Println("No responders available — stream or consumer may be deleted. Stopping consumption.")
+					break // Stop processing
+				} else {
+					log.Println("Error fetching messages:", err)
+					continue // Retry in case of other errors
+				}
 			}
 
 			// Read messages from the channel
@@ -70,8 +76,13 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 			// Low-frequency mode: Fetch one message at a time
 			msgs, err := pull_subscriber.Fetch(1)
 			if err != nil {
-				log.Println("Error fetching messages:", err)
-				continue // Retry fetching messages
+				if errors.Is(err, nats.ErrNoResponders) {
+					log.Println("No responders available — stream or consumer may be deleted. Stopping consumption.")
+					break // Stop processing
+				} else {
+					log.Println("Error fetching messages:", err)
+					continue // Retry in case of other errors
+				}
 			}
 
 			for _, msg := range msgs {
