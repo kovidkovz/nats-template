@@ -6,10 +6,16 @@ import (
 	"log"
 	"time"
 
+	// "github.com/docker/docker/opts"
+	// "github.com/docker/docker/opts"
 	"github.com/nats-io/nats.go"
 )
 
-func Consumer(stream string, subject string, durable_name string, frequency string, jetstream_consumer nats.JetStreamContext, messagehandler func(msg *nats.Msg)) {
+type ConsumerOptions struct {
+	Apikey string
+}
+
+func Consumer(stream string, subject string, durable_name string, frequency string, jetstream_consumer nats.JetStreamContext, messagehandler func(msg *nats.Msg, opts *ConsumerOptions), opts *ConsumerOptions) {
 	// check for the stream
 	streamInfo, err := jetstream_consumer.StreamInfo(stream)
 	if err != nil {
@@ -65,7 +71,8 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 			// Read messages from the channel
 			for msg := range batch.Messages() { // Corrected: Read from the channel
 				log.Println("Total Messages in batch:", len(batch.Messages()))
-				messagehandler(msg)
+				messagehandler(msg, opts)
+				
 				err = msg.Ack()
 				if err != nil {
 					log.Println("Failed to ACK:", err)
@@ -86,7 +93,7 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 			}
 
 			for _, msg := range msgs {
-				messagehandler(msg)
+				messagehandler(msg, opts)
 				err = msg.Ack()
 				if err != nil {
 					log.Println("Failed to ACK:", err)
