@@ -6,8 +6,6 @@ import (
 	"log"
 	"time"
 
-	// "github.com/docker/docker/opts"
-	// "github.com/docker/docker/opts"
 	"github.com/nats-io/nats.go"
 )
 
