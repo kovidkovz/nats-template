@@ -14,7 +14,6 @@ func Dynamic_Consumer_Creation(
 	frequency string,
 	js nats.JetStreamContext,
 	messagehandler func(msg *nats.Msg, opts *ConsumerOptions),
-	opts *ConsumerOptions,
 ) {
 	// Get the key-value bucket
 	kv, err := js.KeyValue(os.Getenv("BUCKET"))
@@ -53,11 +52,7 @@ func Dynamic_Consumer_Creation(
 				continue
 			}
 
-			opts := &ConsumerOptions{
-				Apikey: apiKey,
-			}
-
-			go Consumer(stream, subject, durable, frequency, js, messagehandler, opts)
+			go Consumer(stream, subject, durable, frequency, js, messagehandler, apiKey)
 
 		}
 	}()

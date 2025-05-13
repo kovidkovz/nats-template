@@ -13,7 +13,7 @@ type ConsumerOptions struct {
 	Apikey string
 }
 
-func Consumer(stream string, subject string, durable_name string, frequency string, jetstream_consumer nats.JetStreamContext, messagehandler func(msg *nats.Msg, opts *ConsumerOptions), opts *ConsumerOptions) {
+func Consumer(stream string, subject string, durable_name string, frequency string, jetstream_consumer nats.JetStreamContext, messagehandler func(msg *nats.Msg, opts *ConsumerOptions), apikey string) {
 	// check for the stream
 	streamInfo, err := jetstream_consumer.StreamInfo(stream)
 	if err != nil {
@@ -50,6 +50,10 @@ func Consumer(stream string, subject string, durable_name string, frequency stri
 	}
 
 	fmt.Println("Consumer started and listening for messages...")
+
+	opts := &ConsumerOptions{
+				Apikey: apikey,
+			}
 
 	// Infinite loop to keep processing messages
 	for {
