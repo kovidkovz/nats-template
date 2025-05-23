@@ -46,7 +46,7 @@ func Dynamic_Consumer_Creation(
 				continue
 			}
 
-			apiKey, ok := kvValues["customer_combain_api_key"].(string)
+			apiKey, ok := kvValues["combain_customer_api_key"].(string)
 			if !ok {
 				log.Println("API key not found or not a string")
 				continue
