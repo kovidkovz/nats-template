@@ -2,6 +2,7 @@ package natstemplate
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -45,6 +46,8 @@ func Dynamic_Consumer_Creation(
 				log.Println("Error decoding KV JSON:", err)
 				continue
 			}
+
+			fmt.Println("kev value map:", kvValues)
 
 			apiKey, ok := kvValues["combain_customer_api_key"].(string)
 			if !ok {
