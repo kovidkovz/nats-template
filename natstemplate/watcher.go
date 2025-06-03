@@ -38,7 +38,7 @@ func Dynamic_Consumer_Creation(
 				continue
 			}
 
-			subject := subject_prefix + update.Key() + ".*"
+			subject := subject_prefix + update.Key() + ".>"
 			durable := "consumer_" + update.Key() + env
 			stream := stream_prefix + update.Key()
 
