@@ -17,6 +17,7 @@ func Dynamic_Consumer_Creation(
 	messagehandler func(msg *nats.Msg, opts *ConsumerOptions),
 ) {
 	// Get the key-value bucket
+	log.Println("calling dynamic consumer creation........")
 	kv, err := js.KeyValue(os.Getenv("BUCKET"))
 	env := os.Getenv("ENV")
 	if err != nil {
